@@ -1,24 +1,41 @@
-# AforoAI
+# AforoAI — MVP local
 
-Prototipo universitario para deteccion y conteo local de personas.
+Flujo funcional: **cámara/YOLO → cliente IoT → FastAPI → SQLite → dashboard**. Las imágenes se procesan localmente y no se almacenan ni transmiten.
 
-## Fase actual: vision artificial local
-
-La webcam se procesa localmente con YOLO. Solo se detecta la clase `person` y no se guardan imagenes.
-
-### Windows / PowerShell
+## Inicio rápido (Windows PowerShell)
 
 ```powershell
-.venv\Scripts\Activate.ps1
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python vision/detector.py
 ```
 
-En la primera ejecucion Ultralytics puede descargar automaticamente `yolo11n.pt`.
-Presiona `Q` en la ventana de video para finalizar.
-
-La prueba basica de webcam sigue disponible:
-
+### Terminal 1 — API
 ```powershell
-python vision/test_camera.py
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn backend.main:app --reload
 ```
+Comprueba: http://127.0.0.1:8000/docs
+
+### Terminal 2 — crear histórico simulado (una vez)
+```powershell
+.\.venv\Scripts\Activate.ps1
+python simulator\generate_data.py
+```
+
+### Terminal 2 — dispositivo real con cámara
+```powershell
+python vision\detector_iot.py
+```
+Envía un conteo REAL cada 10 segundos. Q cierra la cámara.
+
+### Terminal 3 — dashboard
+```powershell
+.\.venv\Scripts\Activate.ps1
+cd frontend
+python -m http.server 5173
+```
+Abre: http://127.0.0.1:5173
+
+## Persistencia
+SQLite se crea automáticamente en `backend/aforoai.db`. No subir el archivo a Git.
