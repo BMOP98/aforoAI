@@ -3,3 +3,8 @@ ultralytics
 fastapi
 uvicorn[standard]
 requests
+pandas
+scikit-learn
+numpy
+
+python-dotenv

@@ -1,0 +1,19 @@
+{
+  "modelo": "RandomForestRegressor",
+  "objetivo": "personas dentro de 30 minutos",
+  "muestras": 660,
+  "entrenamiento": 528,
+  "prueba": 132,
+  "mae": 1.68,
+  "rmse": 2.362,
+  "r2": 0.847,
+  "features": [
+    "hora_decimal",
+    "dia_semana",
+    "personas",
+    "ocupacion_porcentaje",
+    "lag_1",
+    "lag_2",
+    "promedio_3"
+  ]
+}

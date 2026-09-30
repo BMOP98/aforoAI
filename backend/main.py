@@ -8,6 +8,8 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from backend.telegram_notifier import procesar_alerta, telegram_configurado
+
 DB_PATH = Path(__file__).resolve().parent / "aforoai.db"
 
 
@@ -76,7 +78,7 @@ def row_to_dict(row):
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "database": "sqlite"}
+    return {"status": "ok", "database": "sqlite", "telegram_configurado": telegram_configurado()}
 
 
 @app.post("/api/mediciones", status_code=201)
@@ -98,7 +100,15 @@ def crear_medicion(data: MedicionIn):
             VALUES (?,?,?,?,?,?,?,?,?)
         """, values)
         row = conn.execute("SELECT * FROM mediciones WHERE id=?", (cur.lastrowid,)).fetchone()
-    return row_to_dict(row)
+        result = row_to_dict(row)
+        try:
+            alerta = procesar_alerta(conn, result)
+        except Exception as exc:
+            # Una falla de Telegram nunca debe impedir guardar la medición.
+            print(f"[WARN] No se pudo enviar alerta Telegram: {exc}")
+            alerta = None
+    result["alerta_telegram"] = alerta
+    return result
 
 
 @app.get("/api/mediciones")
@@ -142,3 +152,49 @@ def estadisticas():
         "aforo_superado": summary["aforo_superado"],
         "por_hora": [dict(r) for r in hours],
     }
+
+@app.get("/api/prediccion")
+def prediccion():
+    """Predice personas dentro de 30 minutos usando el modelo entrenado localmente."""
+    import pickle
+    model_path = Path(__file__).resolve().parents[1] / "ml" / "models" / "occupancy_model.pkl"
+    metrics_path = Path(__file__).resolve().parents[1] / "ml" / "models" / "metrics.json"
+    if not model_path.exists():
+        raise HTTPException(status_code=503, detail="Modelo no entrenado. Ejecuta: python ml/train.py")
+    with get_connection() as conn:
+        rows = conn.execute("SELECT * FROM mediciones ORDER BY timestamp DESC, id DESC LIMIT 3").fetchall()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No existen mediciones")
+    latest = dict(rows[0])
+    chronological = [dict(r) for r in reversed(rows)]
+    vals = [r["personas"] for r in chronological]
+    while len(vals) < 3:
+        vals.insert(0, vals[0])
+    ts = datetime.fromisoformat(latest["timestamp"].replace("Z", "+00:00"))
+    features = {
+        "hora_decimal": ts.hour + ts.minute / 60,
+        "dia_semana": ts.weekday(),
+        "personas": latest["personas"],
+        "ocupacion_porcentaje": latest["ocupacion_porcentaje"],
+        "lag_1": vals[-2],
+        "lag_2": vals[-3],
+        "promedio_3": sum(vals[-3:]) / 3,
+    }
+    with model_path.open("rb") as f:
+        bundle = pickle.load(f)
+    X = [[features[name] for name in bundle["features"]]]
+    predicted = max(0, int(round(float(bundle["model"].predict(X)[0]))))
+    pct = round(predicted / latest["capacidad"] * 100, 2)
+    result = {
+        "personas_actuales": latest["personas"],
+        "capacidad": latest["capacidad"],
+        "horizonte_minutos": 30,
+        "personas_estimadas": predicted,
+        "ocupacion_estimada_porcentaje": pct,
+        "estado_estimado": estado_para(pct),
+        "modelo": "RandomForestRegressor",
+    }
+    if metrics_path.exists():
+        import json
+        result["metricas"] = json.loads(metrics_path.read_text(encoding="utf-8"))
+    return result
