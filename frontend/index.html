@@ -1,8 +1,69 @@
-<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AforoAI Dashboard</title><link rel="stylesheet" href="styles.css"><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script></head><body>
-<header><div><h1>AforoAI</h1><p>Control inteligente y predicción de aforo · MVP local</p></div><span id="apiStatus" class="badge">Conectando…</span></header>
-<main>
-<section class="cards"><article><span>Personas</span><strong id="people">—</strong></article><article><span>Capacidad</span><strong id="capacity">—</strong></article><article><span>Ocupación</span><strong id="occupancy">—</strong></article><article><span>Estado</span><strong id="state">—</strong></article></section>
-<section class="panel"><div class="panel-title"><div><h2>Ocupación reciente</h2><p>Últimas mediciones almacenadas</p></div><span id="origin" class="badge neutral">—</span></div><div class="chart-wrap"><canvas id="historyChart"></canvas></div></section>
-<section class="grid"><article class="panel"><h2>Resumen histórico</h2><div class="stats"><div><span>Promedio</span><b id="avg">—</b></div><div><span>Máximo</span><b id="max">—</b></div><div><span>Aforo superado</span><b id="exceeded">—</b></div><div><span>Mediciones</span><b id="total">—</b></div></div></article><article class="panel"><h2>Promedio por hora</h2><div class="chart-wrap small"><canvas id="hourChart"></canvas></div></article></section>
-<section class="panel prediction"><div class="panel-title"><div><h2>Predicción IA · +30 minutos</h2><p id="predModel">Modelo predictivo local</p></div><span class="badge">Machine Learning</span></div><div class="prediction-grid"><div><span>Ahora</span><b id="predNow">—</b></div><div><span>En 30 min</span><b id="predFuture">—</b></div><div><span>Ocupación estimada</span><b id="predPct">—</b></div><div><span>Estado esperado</span><b id="predState">—</b></div></div><p id="predError"></p></section>
-</main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>AforoAI Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <div>
+            <h1>AforoAI</h1>
+            <p>Control inteligente y predicción de aforo · MVP local</p>
+        </div><span id="apiStatus" class="badge">Conectando…</span>
+    </header>
+    <main>
+        <section class="cards">
+            <article><span>Personas</span><strong id="people">—</strong></article>
+            <article><span>Capacidad</span><strong id="capacity">—</strong></article>
+            <article><span>Ocupación</span><strong id="occupancy">—</strong></article>
+            <article><span>Estado</span><strong id="state">—</strong></article>
+        </section>
+        <section class="panel">
+            <div class="panel-title">
+                <div>
+                    <h2>Ocupación reciente</h2>
+                    <p>Últimas mediciones almacenadas</p>
+                </div><span id="origin" class="badge neutral">—</span>
+            </div>
+            <div class="chart-wrap"><canvas id="historyChart"></canvas></div>
+        </section>
+        <section class="grid">
+            <article class="panel">
+                <h2>Resumen histórico</h2>
+                <div class="stats">
+                    <div><span>Promedio</span><b id="avg">—</b></div>
+                    <div><span>Máximo</span><b id="max">—</b></div>
+                    <div><span>Aforo superado</span><b id="exceeded">—</b></div>
+                    <div><span>Mediciones</span><b id="total">—</b></div>
+                </div>
+            </article>
+            <article class="panel">
+                <h2>Promedio por hora</h2>
+                <div class="chart-wrap small"><canvas id="hourChart"></canvas></div>
+            </article>
+        </section>
+        <section class="panel prediction">
+            <div class="panel-title">
+                <div>
+                    <h2>Predicción IA · +30 minutos</h2>
+                    <p id="predModel">Modelo predictivo local</p>
+                </div><span class="badge">Machine Learning</span>
+            </div>
+            <div class="prediction-grid">
+                <div><span>Ahora</span><b id="predNow">—</b></div>
+                <div><span>En 30 min</span><b id="predFuture">—</b></div>
+                <div><span>Ocupación estimada</span><b id="predPct">—</b></div>
+                <div><span>Estado esperado</span><b id="predState">—</b></div>
+            </div>
+            <p id="predError"></p>
+        </section>
+    </main>
+    <script src="app.js?v=2"></script>
+</body>
+
+</html>
